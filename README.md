@@ -12,7 +12,6 @@ AEVO是一个去中心化衍生品交易平台，主要交易品种是永续合�
 
 具体的规则可以在这里查看：https://aevo.mirror.xyz/pVCrIjnPwDkC7h16vr_Ca__AdsXL31ZL2VylkICX0Ss 
 
-刷交互策略：我个人刷了12个账户，每个账户刷了100万的空投交易量，综合下来每个账户的成本30U左右。
 
 
 
