@@ -1,31 +1,23 @@
 import asyncio
 import json
-
-from loguru import logger
-
 from aevo import AevoClient
 
 
 async def main():
-    # The following values which are used for authentication on private endpoints, can be retrieved from the Aevo UI
+    # ==================== 配置 ====================
+    # 设置账户
     aevo = AevoClient(
-        signing_key="",
-        wallet_address="",
-        api_key="",
-        api_secret="",
+        signing_key="", # 钱包私钥
+        wallet_address="", # 钱包地址
+        api_key="", # API key
+        api_secret="", # API secret
         env="mainnet",
     )
-    aevo_2 = AevoClient(
-    signing_key="",
-    wallet_address="",
-    api_key="",
-    api_secret="",
-    env="mainnet",
-    )
 
-
-    tradeAsset = 'ETH'
-    max_trade_number = 10
+    tradeAsset = 'ETH' # 设置交易币种
+    quantity = 0.2  # 设置每次交易数量(单位：币)
+    max_trade_number = 50  # 设置刷交易的次数，开平仓为一次
+    # ===============================================
     
 
     if not aevo.signing_key:
@@ -36,7 +28,6 @@ async def main():
     markets = aevo.get_markets(tradeAsset)
     await aevo.open_connection()
     await aevo.subscribe_ticker(f"ticker:{tradeAsset}:PERPETUAL")
-    open_position = True
     number = 0
     async for msg in aevo.read_messages():
         data = json.loads(msg)["data"]
@@ -49,31 +40,13 @@ async def main():
             price_decimals = len(str(price_step).split('.')[1])
             limit_price = round((bid_price + ask_price) / 2, price_decimals)
             instrument_id = markets[0]['instrument_id']
-            amount_step = float(markets[0]['amount_step'])
-            amount_decimals = len(str(amount_step).split('.')[1])
-            # quantity = round( 300 / limit_price, amount_decimals )
-            quantity = 0.2
-
-            if open_position:
-                print('开始开仓')
-                response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=True, limit_price=limit_price, quantity=quantity, post_only=False)
-                print(response)
-                response = aevo_2.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=limit_price, quantity=quantity, post_only=False)
-                print(response)
-                open_position = False
-                # 暂停2秒
-                await asyncio.sleep(5)
-            else:
-                print('开始平仓')
-                response = aevo_2.rest_create_order(instrument_id=instrument_id, is_buy=True, limit_price=limit_price, quantity=quantity, post_only=False)
-                print(response)
-                response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=limit_price, quantity=quantity, post_only=False)
-                print(response)
-                open_position = True
-                number += 1
-            # 暂停2秒
-            await asyncio.sleep(30)
-                
+            response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=True, limit_price=limit_price, quantity=quantity, post_only=False)
+            print(response)
+            response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=limit_price, quantity=quantity, post_only=False)
+            print(response)
+            number += 1
+            # 暂停5秒
+            await asyncio.sleep(5)
             
             if number >= max_trade_number:
                 print('交易次数已达到上限，程序退出')

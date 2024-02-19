@@ -84,8 +84,8 @@ def generate_api_info(account_key, environment):
     return api_info
 
 if __name__ == "__main__":
-    input_path = '/Users/wr/Desktop/BOT/aevoTrading/data/input/aevoAccount.csv'
-    output_path = '/Users/wr/Desktop/BOT/aevoTrading/data/output/api_keys.csv'
+    input_path = '/Users/wr/Desktop/BOT/aevoTrading/data/input/aevoAccount.csv'  # 输入钱包私钥的路径
+    output_path = '/Users/wr/Desktop/BOT/aevoTrading/data/output/api_keys.csv'  # 保存api_key的路径
     df = pd.read_csv(input_path)
     environment = "mainnet"
     apis = []
