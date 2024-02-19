@@ -1,118 +1,72 @@
-# Aevo SDK
+# AEVO 刷交易量程序
 
-This repo hosts Aevo's Python SDK, which simplifies the common operations around signing and creating orders.
 
-Please see the documentation for more details:
 
-[REST API docs](https://docs.aevo.xyz/reference/urls)
+# 项目介绍
 
-[Websocket API docs](https://docs.aevo.xyz/reference/endpoints)
+AEVO是一个去中心化衍生品交易平台，主要交易品种是永续合约和期权。项目前身是Ribbon Finance，项目获得了Paradigm、Dragonfly和Coinbase等资本方的投资，项目最近上合约的速度非常快，很多项目在。
 
-Signing and API Keys can be generated through the Aevo UI:
+项目原先发过一个RBN的代币，并且21年发过一次空投，平均一个地址空投了50万RMB。未来老币RBN将置换成AEVO，根据文档中的描述，项目代币中16%的代币用于激励（包括空投），AEVO代币总量10亿枚，按照目前RBN的币价，这部分价值8000万U左右。
 
-Signing Keys: https://app.aevo.xyz/settings or https://testnet.aevo.xyz/settings
+项目最近上了一个按交易量空投的活动。空投根据用户的空投交易量发放，空投交易量=交易量*boost因子，boost因子根据最近的7天交易量计算，交易越多提升越高。
 
-API Keys: https://app.aevo.xyz/settings/api-keys or https://testnet.aevo.xyz/settings/api-keys
+具体的规则可以在这里查看：https://aevo.mirror.xyz/pVCrIjnPwDkC7h16vr_Ca__AdsXL31ZL2VylkICX0Ss 
 
-NOTE: For security purposes, signing keys automatically expire 1 week after generation
+刷交互策略：我个人刷了12个账户，每个账户刷了100万的空投交易量，综合下来每个账户的成本30U左右。
 
-## Getting Started
 
-It is recommended that you use a virtual environment to install the dependencies. The code has specifically been tested on Python 3.11.4.
 
-```
-virtualenv -p python3 .venv
-source .venv/bin/activate
-```
+# AEVO账户准备
 
-Then, install the dependencies for the Python SDK.
+项目链接：
 
-```
-pip install -r requirements.txt
-```
+ - 官方链接：https://app.aevo.xyz/perpetual/ilv
+ - 我的邀请链接：https://app.aevo.xyz/r/Roan-Elastic-Nakamoto
 
-Next, create an AevoClient instance with your credentials.
+连接钱包后存入USDC，OP或者Arbitrum网络的都可以，费用都很低。
 
-```python
-from client import AevoClient
+![image-20240219175549654](https://s2.loli.net/2024/02/19/nEeOGIydctkHRj9.png)
 
-client = AevoClient(
-    signing_key="",
-    wallet_address="",
-    api_key="",
-    api_secret="",
-    env="testnet",
-)
-markets = aevo.get_markets("ETH")
-print(markets) # This should work if your client is setup right
-```
+![image-20240219173411045](https://s2.loli.net/2024/02/19/DRpF82oZ3VP4NJy.png)
 
-The variables that you have to pass into AevoClient are:
 
-`signing_key` - The private key of the signing key, used to sign orders.
 
-`wallet_address` - Ethereum address of the account.
+# 创建API
 
-`api_key` - API key for the account. Used for private operations.
+API可以直接在网站上创建或通过代码创建, 钱包数量少可以直接在网页创建，钱包多的可以用我的代码批量创建。
 
-`api_secret` - API secret for the account.
+## 在网页中创建
 
-`env` - Either `testnet` or `mainnet`.
+访问：https://app.aevo.xyz/settings/api-keys
 
-## Subscribing to realtime Websocket channels
+点击 Creaate API创建API，创建完成后可以点击API Key和APISecret复制。第一次复制Secret的时候需要在小狐狸签名确认。
 
-**Subscribing to orderbook updates**
+![image-20240219174644354](https://s2.loli.net/2024/02/19/4JVzcHrZMx9pE7X.png)
 
-```python
-async def main():
-    aevo = AevoClient(
-        signing_key="",
-        wallet_address="",
-        api_key="",
-        api_secret="",
-        env="testnet",
-    )
+![image-20240219174946898](https://s2.loli.net/2024/02/19/Q4dzXfoL3S1e7B9.png)
 
-    await aevo.open_connection() # need to do this first to open wss connections
-    await aevo.subscribe_ticker("ticker:ETH:PERPETUAL")
 
-    async for msg in aevo.read_messages():
-        print(msg)
 
-if __name__ == "__main__":
-    asyncio.run(main())
-```
+# 使用代码创建
 
-**Subscribing to index price**
+用create_apiKey.py代码可以批量创建API，按照data/input目录下的aevoAccount.csv编辑自己的钱包文件，然后将路径填写到代码中，然后运行create_apiKey.py即可。
 
-```python
-await aevo.open_connection()
-await aevo.subscribe_index(asset="ETH")
-```
+![image-20240219180019364](https://s2.loli.net/2024/02/19/EIPhs8g4fT6coWS.png)
 
-**(Authenticated) Subscribing to private trades**
+# 刷交易代码
 
-```python
-await aevo.open_connection()
-await aevo.subscribe_fills()
-```
+## 刷交易策略
 
-## Websocket Order Flow
+交易策略是根据设置的品种和交易币数同时挂买卖单，挂单价格是买一和卖一的中间价，交易达到指定次数后程序停止运行。
 
-See `order_ws_example.py` for an example flow of how to create, edit and cancel an order via websocket. Due to the use of `websockets` library it is recommended that you implement your code using `asyncio` as well.
+## 程序执行
 
-It can be tested by running `python order_ws_example.py`.
+刷交易的程序是aevo_trade.py，下图的配置部分根据实际情况进行配置，修改完毕后运行程序。
 
-## REST API Order Flow
+![image-20240219180803782](https://s2.loli.net/2024/02/19/sScZVLxyoNJMTDa.png)
 
-See `order_rest_example.py` for an example flow of how to create and cancel an order via REST API.
+## 程序代码
 
-It can be tested by running `python order_rest_example.py`.
+代码链接：https://github.com/shuail0/aevoTrading
 
-## Generating infinite expiry signing key
-
-Normally signing keys generated via the UI expire after 1 week. However, you can generate a signing key that never expires by using the `generate_infinite_expiry_signing_key.py` script.
-
-You will need to extract your private key from your wallet and paste it into the code in the section indicated before running it.
-
-#### NOTE: Be very careful with this as anyone with your private key will have complete access to your funds. Remember to delete the key from the code straight after generating the signing key.
+作者推特：https://twitter.com/crypto0xLeo
