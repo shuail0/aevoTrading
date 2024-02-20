@@ -513,34 +513,3 @@ class AevoClient:
             Account._sign_hash(signable_bytes, self.signing_key).signature.hex(),
             f"0x{signable_bytes.hex()}",
         )
-
-
-# async def main():
-#     # The following values which are used for authentication on private endpoints, can be retrieved from the Aevo UI
-#     aevo = AevoClient(
-#         signing_key="cad2716ad3028c52712858b836af38b1f2e95de2d502eebba4876dd0e940811a",
-#         wallet_address="0x32Ec95fF39425Bd7F2C98D078A0b4AfB03641521",
-#         api_key="UErRHz6UjwSxeEEaVaAR87nDPSS6J9Tm",
-#         api_secret="c43050946d12c7f2983c2097d375ac405aa0fdd15e0188c8d59527fe1e9b29a1",
-#         env="mainnet",
-#     )
-
-#     markets = aevo.get_markets("ETH")
-#     await aevo.open_connection()
-#     await aevo.subscribe_ticker("ticker:ETH:PERPETUAL")
-#     # await aevo.open_connection()
-#     # await aevo.subscribe_index(asset="ETH")
-#     async for msg in aevo.read_messages():
-#         # logger.info(msg)
-#         # logger.info(json.loads(msg)['data'])
-#         # print(aevo.get_index("ETH")
-#         data = json.loads(msg)["data"]
-#         # 如果数据里包含ticker，就打印出来
-#         if "tickers" in data:
-#             print(data["tickers"][0])
-#             exit()
-        
-
-
-# if __name__ == "__main__":
-#     asyncio.run(main())
