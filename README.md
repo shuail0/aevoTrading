@@ -62,9 +62,24 @@ API可以直接在网站上创建或通过代码创建, 钱包数量少可以直
 
 ## 程序执行
 
+首先在代码目录下创建一个`.env`文件，然后按照下面的格式填入账户信息
+
+``` bash
+SIGNING=钱包私钥
+WALLETADDRESS=钱包地址
+APIKEY=API_Key
+APISECRET=API_Seret
+```
+
+![image-20240220191231393](https://s2.loli.net/2024/02/20/VlC2LGamAzyvHht.png)
+
+
+
 刷交易的程序是aevo_trade.py，下图的配置部分根据实际情况进行配置，修改完毕后运行程序。
 
-![image-20240219180803782](https://s2.loli.net/2024/02/19/sScZVLxyoNJMTDa.png)
+
+
+![image-20240220191348102](https://s2.loli.net/2024/02/20/P2Dr1LE5fuJRxhI.png)
 
 ## 程序代码
 

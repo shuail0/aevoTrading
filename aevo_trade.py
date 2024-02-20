@@ -10,8 +10,13 @@ load_dotenv()
 
 
 async def main():
-    # ==================== 配置 ====================
-    # 设置账户
+
+    # ==================== 交易配置 ====================
+    tradeAsset = 'ETH' # 设置交易币种
+    quantity = 0.01  # 设置每次交易数量(单位：币)
+    max_trade_number = 20  # 设置刷交易的次数，开平仓为一次
+    # ===============================================
+    
     aevo = AevoClient(
         signing_key=os.getenv("SIGNING"), # 钱包私钥
         wallet_address=os.getenv("WALLETADDRESS"), # 钱包地址
@@ -19,12 +24,6 @@ async def main():
         api_secret=os.getenv("APISECRET"), # API secret
         env="mainnet",
     )
-
-    tradeAsset = 'ETH' # 设置交易币种
-    quantity = 0.01  # 设置每次交易数量(单位：币)
-    max_trade_number = 20  # 设置刷交易的次数，开平仓为一次
-    # ===============================================
-    
 
 
     if not aevo.signing_key:
