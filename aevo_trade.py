@@ -1,24 +1,31 @@
 import asyncio
 import json
 from aevo import AevoClient
+from dotenv import load_dotenv
+import os
+
+# 加载.env文件
+load_dotenv()
+
 
 
 async def main():
     # ==================== 配置 ====================
     # 设置账户
     aevo = AevoClient(
-        signing_key="", # 钱包私钥
-        wallet_address="", # 钱包地址
-        api_key="", # API key
-        api_secret="", # API secret
+        signing_key=os.getenv("SIGNING"), # 钱包私钥
+        wallet_address=os.getenv("WALLETADDRESS"), # 钱包地址
+        api_key=os.getenv("APIKEY"), # API key
+        api_secret=os.getenv("APISECRET"), # API secret
         env="mainnet",
     )
 
     tradeAsset = 'ETH' # 设置交易币种
-    quantity = 0.2  # 设置每次交易数量(单位：币)
-    max_trade_number = 50  # 设置刷交易的次数，开平仓为一次
+    quantity = 0.01  # 设置每次交易数量(单位：币)
+    max_trade_number = 20  # 设置刷交易的次数，开平仓为一次
     # ===============================================
     
+
 
     if not aevo.signing_key:
         raise Exception(
@@ -45,6 +52,21 @@ async def main():
             response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=limit_price, quantity=quantity, post_only=False)
             print(response)
             number += 1
+            
+            print('第{}次交易结束'.format(number),'开始查询是否有未平仓位。')
+            account_info = aevo.rest_get_account()
+            positions = account_info['positions']
+            if len(positions) > 0:
+                # 找出instrument_name等于交易资产的position
+                for position in positions:
+                    if position['instrument_name'] == f'{tradeAsset}-PERP':
+                        # 市价平仓
+                        instrument_id, quantity, side = position['instrument_id'], float(position['amount']), position['side']
+                        is_buy = True if side == 'sell' else False
+                        limit_price = 2**200 - 1 if is_buy else 0
+                        print(f'存在未平仓位，开始平仓,并取消所有挂单。instrument_id: {instrument_id}, quantity: {quantity}, is_buy: {is_buy}, limit_price: {limit_price}')
+                        response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=limit_price, quantity=quantity, post_only=False)
+                        aevo.rest_cancel_all_orders()
             # 暂停5秒
             await asyncio.sleep(5)
             
