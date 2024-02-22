@@ -13,7 +13,7 @@ import os
 load_dotenv()
 
 
-
+# 市价单
 async def main():
 
     # ==================== 交易配置 ====================
@@ -43,47 +43,51 @@ async def main():
     async for msg in aevo.read_messages():
         data = json.loads(msg)["data"]
         # 如果数据里包含ticker，就执行交易
-        if "tickers" in data:
-            print('开始执行第{}次交易'.format(number + 1))
-            instrument_id = markets[0]['instrument_id']
-            bid_price = float(data["tickers"][0]['bid']['price'])
-            ask_price = float(data["tickers"][0]['ask']['price'])
-            price_step = float(markets[0]['price_step'])
-            price_decimals = len(str(price_step).split('.')[1])
-            # 计算价差比例
-            spread = (ask_price - bid_price) / bid_price
-            print(f'买一价：{bid_price}, 卖一价：{ask_price}, 价差比例：{spread}')
-            if spread < 0.0005:
-                print('价差比例小于0.05%，直接下市价单')
-                # 下市价卖单
-                response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=0, quantity=quantity, post_only=False)
-                print(response)
-                buy_order_price = round( ask_price * 1.02, price_decimals)
-                # 下市价买单单
-                response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=True, limit_price=buy_order_price, quantity=quantity, post_only=False)
-                print(response)
+        try:
+            if "tickers" in data:
+                print('开始执行第{}次交易'.format(number + 1))
+                instrument_id = markets[0]['instrument_id']
+                bid_price = float(data["tickers"][0]['bid']['price'])
+                ask_price = float(data["tickers"][0]['ask']['price'])
+                price_step = float(markets[0]['price_step'])
+                price_decimals = len(str(price_step).split('.')[1])
+                # 计算价差比例
+                spread = (ask_price - bid_price) / bid_price
+                print(f'买一价：{bid_price}, 卖一价：{ask_price}, 价差比例：{spread}')
+                if spread < 0.0005:
+                    print('价差比例小于0.05%，直接下市价单')
+                    # 下市价卖单
+                    response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=0, quantity=quantity, post_only=False)
+                    print(response)
+                    buy_order_price = round( ask_price * 1.02, price_decimals)
+                    # 下市价买单单
+                    response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=True, limit_price=buy_order_price, quantity=quantity, post_only=False)
+                    print(response)
 
-                print('第{}次交易结束'.format(number),'开始查询是否有未平仓位。')
-                account_info = aevo.rest_get_account()
-                positions = account_info['positions']
-                if len(positions) > 0:
-                    # 找出instrument_name等于交易资产的position
-                    for position in positions:
-                        if position['instrument_name'] == f'{tradeAsset}-PERP':
-                            # 市价平仓
-                            instrument_id, cpquantity, side = position['instrument_id'], float(position['amount']), position['side']
-                            is_buy = True if side == 'sell' else False
-                            limit_price = 2**200 - 1 if is_buy else 0
-                            print(f'存在未平仓位，开始平仓,并取消所有挂单。instrument_id: {instrument_id}, quantity: {cpquantity}, is_buy: {is_buy}, limit_price: {limit_price}')
-                            response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=limit_price, quantity=cpquantity, post_only=False)
-                            aevo.rest_cancel_all_orders()
-                # 暂停5秒
-                number += 1
-                await asyncio.sleep(5)
-            
-            if number >= max_trade_number:
-                print('交易次数已达到上限，程序退出')
-                exit()
+                    print('第{}次交易结束'.format(number),'开始查询是否有未平仓位。')
+                    account_info = aevo.rest_get_account()
+                    positions = account_info['positions']
+                    if len(positions) > 0:
+                        # 找出instrument_name等于交易资产的position
+                        for position in positions:
+                            if position['instrument_name'] == f'{tradeAsset}-PERP':
+                                # 市价平仓
+                                instrument_id, cpquantity, side = position['instrument_id'], float(position['amount']), position['side']
+                                is_buy = True if side == 'sell' else False
+                                limit_price = 2**200 - 1 if is_buy else 0
+                                print(f'存在未平仓位，开始平仓,并取消所有挂单。instrument_id: {instrument_id}, quantity: {cpquantity}, is_buy: {is_buy}, limit_price: {limit_price}')
+                                response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=limit_price, quantity=cpquantity, post_only=False)
+                                aevo.rest_cancel_all_orders()
+                    # 暂停5秒
+                    number += 1
+                    await asyncio.sleep(5)
+                
+                if number >= max_trade_number:
+                    print('交易次数已达到上限，程序退出')
+                    exit()
+        except Exception as e:
+            print(e)
+            continue
 
 if __name__ == "__main__":
     asyncio.run(main())
