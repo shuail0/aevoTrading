@@ -18,8 +18,8 @@ async def main():
 
     # ==================== 交易配置 ====================
     tradeAsset = 'ETH' # 设置交易币种
-    quantity = 0.01  # 设置每次交易数量(单位：币)
-    max_trade_number = 20  # 设置刷交易的次数，开平仓为一次
+    quantity = 0.1  # 设置每次交易数量(单位：币)
+    max_trade_number = 50  # 设置刷交易的次数，开平仓为一次
     # ===============================================
     
     aevo = AevoClient(
@@ -58,11 +58,10 @@ async def main():
                 # 下市价卖单
                 response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=0, quantity=quantity, post_only=False)
                 print(response)
+                # 下市价买单
                 buy_order_price = round( ask_price * 1.02, price_decimals)
-                # 下市价买单单
                 response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=True, limit_price=buy_order_price, quantity=quantity, post_only=False)
                 print(response)
-
                 print('第{}次交易结束'.format(number),'开始查询是否有未平仓位。')
                 account_info = aevo.rest_get_account()
                 positions = account_info['positions']
@@ -73,9 +72,10 @@ async def main():
                             # 市价平仓
                             instrument_id, cpquantity, side = position['instrument_id'], float(position['amount']), position['side']
                             is_buy = True if side == 'sell' else False
-                            limit_price = 2**200 - 1 if is_buy else 0
+                            limit_price = round( ask_price * 1.1, price_decimals) if is_buy else 0
                             print(f'存在未平仓位，开始平仓,并取消所有挂单。instrument_id: {instrument_id}, quantity: {cpquantity}, is_buy: {is_buy}, limit_price: {limit_price}')
-                            response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=False, limit_price=limit_price, quantity=cpquantity, post_only=False)
+                            response = aevo.rest_create_order(instrument_id=instrument_id, is_buy=is_buy, limit_price=limit_price, quantity=cpquantity, post_only=False)
+                            print(response)
                             aevo.rest_cancel_all_orders()
                 # 暂停5秒
                 number += 1
