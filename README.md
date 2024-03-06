@@ -30,7 +30,6 @@ AEVO是一个去中心化衍生品交易平台，主要交易品种是永续合�
 
 项目链接：
 
- - 官方链接：https://app.aevo.xyz/perpetual/ilv
  - 我的邀请链接：https://app.aevo.xyz/r/Roan-Elastic-Nakamoto
 
 连接钱包后存入USDC，OP或者Arbitrum网络的都可以，费用都很低。
@@ -57,19 +56,17 @@ API可以直接在网站上创建或通过代码创建, 钱包数量少可以直
 
 
 
-# 使用代码创建
+## 使用代码创建
 
 用create_apiKey.py代码可以批量创建API，按照data/input目录下的aevoAccount.csv编辑自己的钱包文件，然后将路径填写到代码中，然后运行create_apiKey.py即可。
 
 ![image-20240219180019364](https://s2.loli.net/2024/02/19/EIPhs8g4fT6coWS.png)
 
-# 刷交易代码
+# 程序运行
 
-## 刷交易策略
 
-交易策略是根据设置的品种和交易币数同时挂买卖单，挂单价格是买一和卖一的中间价，交易达到指定次数后程序停止运行。
 
-## 程序执行
+## API配置
 
 首先在代码目录下创建一个`.env`文件，然后按照下面的格式填入账户信息
 
@@ -82,15 +79,37 @@ APISECRET=API_Seret
 
 ![image-20240220191231393](https://s2.loli.net/2024/02/20/VlC2LGamAzyvHht.png)
 
+## 永续合约
 
+永续合约的交易程序有`aevo_trade.py`和`aevo_market_price_trade.py`两个,盘口价差比较小时推荐跑`aevo_market_price_trade.py`,价差比较大时推荐跑`aevo_trade.py`
 
-刷交易的程序是`aevo_trade.py`(同时挂买卖单)和`aevo_market_price_trade.py`(同时挂市价卖买单)，流动性比较好的交易对推荐用挂市价单的方式刷，下图的配置部分根据实际情况进行配置，修改完毕后运行程序。
+`aevo_trade.py`：交易策略是根据设置的品种和交易币数同时挂买卖单，挂单价格是买一和卖一的中间价，交易达到指定次数后程序停止运行。
+
+`aevo_market_price_trade.py`：(同时挂市价卖买单)，流动性比较好的交易对推荐用挂市价单的方式刷，下图的配置部分根据实际情况进行配置，修改完毕后运行程序。
 
 
 ![image-20240220191348102](https://s2.loli.net/2024/02/20/P2Dr1LE5fuJRxhI.png)
 
-## 程序代码
+
+
+## 期权合约
+
+刷期权的程序是`aevo_option_trade.py`,交易策略是根据设定的价值同时挂相同价格的买单和卖单。
+
+不知道怎么期权合约选择可以参考这篇推文：https://twitter.com/crypto0xLeo/status/1764333201487757542
+
+![image-20240306234335847](/Users/lishuai/Documents/crypto/bockchainbot/aevoTrading/image-20240306234335847.png)
+
+
+
+`option_symbol`的值在选定合约后的浏览器地址输入框里面复制：
+
+![image-20240306234651860](https://s2.loli.net/2024/03/06/FqihDQMGHoOX7LR.png)
+
+
+
+## 其他
 
 代码链接：https://github.com/shuail0/aevoTrading
 
-作者推特：https://twitter.com/crypto0xLeo
+欢迎关注推特：https://twitter.com/crypto0xLeo
