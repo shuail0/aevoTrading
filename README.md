@@ -98,7 +98,7 @@ APISECRET=API_Seret
 
 不知道怎么期权合约选择可以参考这篇推文：https://twitter.com/crypto0xLeo/status/1764333201487757542
 
-![image-20240306234335847](/Users/lishuai/Documents/crypto/bockchainbot/aevoTrading/image-20240306234335847.png)
+![image-20240306234335847](https://s2.loli.net/2024/03/06/2YftBbA3q7ONcHd.png)
 
 
 
